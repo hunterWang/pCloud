@@ -5,48 +5,52 @@ import sys
 
 
 #---------------------parameter -------------
-times=1 #how many path you want to produce 
-width=20 #boundry
+times=300 #how many path you want to produce 
+width=30 #boundry
 speed=1  
 period=15 #time have one point 
-time=15  #how much time the point move in second
+time=600  #how much time the point move in second
 maxDistant=speed*period
 radius=5 #equvilant to accurancy for track
+std = 2  #stander deviation to produce mapP 
 
 
 def createPath ():
 	#---------------------explain -------------
 	'''create many fake path inside a width*width 2Dbox
 	times means how many path you need,
-	will return a list contain fake path''' 
+	will return a list contain fakePath and realPath''' 
 	#---------------------parameter -------------
 
 	#---------------------cotroller -------------
 	fakePointOn = 1
 
 	#---------------------start------------------
-	path=[]
+	realPath=[]
+	fakePath=[]
 	for j in range(0,times):		
-		path.append([])
-		path[j].append([random.randint(0,width),random.randint(0,width)]) #r0
+		realPath.append([])
+		fakePath.append([])
+		realPath[j].append([random.randint(0,width),random.randint(0,width)]) #r0
+		fakePath[j].append([0,0])
 		# print path[j][0]	
 		# print path[j][0][1]	
 		for i in range(0,int(time/period)):
 			gate=0
 			while gate==0:
-				x = path[j][i][0] + random.randint(-maxDistant,maxDistant)
-				y = path[j][i][1] + random.randint(-maxDistant,maxDistant)
+				x = realPath[j][i][0] + random.randint(-maxDistant,maxDistant)
+				y = realPath[j][i][1] + random.randint(-maxDistant,maxDistant)
 				if 0<x<width and 0<y<width:
 					gate=1
 
-			path[j].append([x,y])
+			realPath[j].append([x,y])
+			fakePath[j].append([0,0])
 
 		if fakePointOn:
 			for i in range(0,int(time/period)):
-				path[j][i]=fakePoint(path[j][i])
+				fakePath[j][i]=fakePoint(realPath[j][i])
 
-
-
+	path=[realPath,fakePath]
 	return path
 
 def fakePoint (point):
@@ -81,7 +85,7 @@ def createPCloud(path):
 	'''
 	from math import exp,sqrt,pi
 	#---------------------parameter -------------
-	std = 2
+	
 
 	#---------------------start------------------
 	map=[]
@@ -96,24 +100,45 @@ def createPCloud(path):
 				for j in range(0,width):
 					rSruare = (x-i)*(x-i)+(y-j)*(y-j)
 					map[n][t][i].append(1/(sqrt(2*pi)*std)*exp(-1*rSruare/(2*std*std)))
-			# map[n][t]=normalizeMap(map[n][t])
+			map[n][t]=normalizeMap(map[n][t])
 
 
 	return map
 
+def normalizeMap(mapP):
+	#---------------------explain -------------
+	'''
+	input is mapP[0][0] to mapP[n][n]
+	and output will let it sum up to 1     	
+	'''
+	#---------------------start ------------
+
+	sum=0
+	for i in range(0,len(mapP)):
+		for j in range(0,len(mapP[i])):
+			sum += mapP[i][j]
+	factor=1/sum
+	for i in range(0,len(mapP)):
+		for j in range(0,len(mapP[i])):
+			mapP[i][j]=mapP[i][j]*factor
+	return mapP
 
 
 
 
-path =  createPath()
-mapP = createPCloud(path)
 
 
+path = createPath()
+mapP = createPCloud(path[1]) #create mapP by fakePath
 
-for i in range(0,len(mapP[0][0])):
-	for j in range(0,len(mapP[0][0][i])):
-		print "%.3f," %mapP[0][0][i][j],		
-	print "\n"
+
+# sum=0
+# for i in range(0,len(mapP[0][0])):
+# 	for j in range(0,len(mapP[0][0][i])):
+# 		# print "%.3f," %mapP[0][0][i][j],	
+# 		sum+=mapP[0][0][i][j]
+
+# print sum
 
 
 
