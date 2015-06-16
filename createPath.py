@@ -11,8 +11,13 @@ def createPath (times):
 	width=20 #boundry
 	speed=1  
 	period=15 #time have one point 
-	time=3600  #how much time the point move in second
+	time=60  #how much time the point move in second
 	maxDistant=speed*period
+
+	radius=5 #equvilant to accurancy for track
+
+	#---------------------cotroller -------------
+	fakePointOn = 1
 
 	#---------------------start------------------
 	path=[]
@@ -28,16 +33,42 @@ def createPath (times):
 				y = path[j][i][1] + random.randint(-maxDistant,maxDistant)
 				if 0<x<width and 0<y<width:
 					gate=1
-			path[j].append([x,y])	
+
+			path[j].append([x,y])
+
+		if fakePointOn:
+			for i in range(0,int(time/period)):
+				path[j][i]=fakePoint(path[j][i],width,radius)
+
+
 
 	return path
-	 	
+
+def fakePoint (point,width,radius):
+	#---------------------explain -------------
+	#point should be [x.y] and will rutnrn a point which 
+	#distant from point in radius you want and inside the box with width  
+	
+
+	#---------------------parameter -------------
+	# radius = 5 #equvilant to accurancy for track
+	
+
+
+	#---------------------start------------------
+	gate = 0
+	while gate == 0:
+		x = point[0] + random.randint(-radius,radius)
+		y = point[1] + random.randint(-radius,radius)
+		if 0<x<width and 0<y<width:
+			gate=1
+	return [x,y]
 
 
 
 
-path = createPath(2)
-print path
+print createPath(1)
+# print fakePoint([3,4])
 
 
 
