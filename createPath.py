@@ -7,6 +7,7 @@ import sys
 #---------------------parameter -------------
 times=300 #how many path you want to produce 
 width=30 #boundry
+border=2 #width=border+zoneInside
 speed=1  
 period=15 #time have one point 
 time=600  #how much time the point move in second
@@ -19,7 +20,8 @@ def createPath ():
 	#---------------------explain -------------
 	'''create many fake path inside a width*width 2Dbox
 	times means how many path you need,
-	will return a list contain fakePath and realPath''' 
+	will return a list contain fakePath(path[1]) and realPath(path[0])
+	path will like path[n][t][(x.y)]''' 
 	#---------------------parameter -------------
 
 	#---------------------cotroller -------------
@@ -28,27 +30,27 @@ def createPath ():
 	#---------------------start------------------
 	realPath=[]
 	fakePath=[]
-	for j in range(0,times):		
+	for n in range(0,times):		
 		realPath.append([])
 		fakePath.append([])
-		realPath[j].append([random.randint(0,width),random.randint(0,width)]) #r0
-		fakePath[j].append([0,0])
+		realPath[n].append([random.randint(0,width-border),random.randint(0,width-border)]) #r0
+		fakePath[n].append([0,0])
 		# print path[j][0]	
 		# print path[j][0][1]	
-		for i in range(0,int(time/period)):
+		for t in range(0,int(time/period)):
 			gate=0
 			while gate==0:
-				x = realPath[j][i][0] + random.randint(-maxDistant,maxDistant)
-				y = realPath[j][i][1] + random.randint(-maxDistant,maxDistant)
+				x = realPath[n][t][0] + random.randint(-maxDistant,maxDistant)
+				y = realPath[n][t][1] + random.randint(-maxDistant,maxDistant)
 				if 0<x<width and 0<y<width:
 					gate=1
 
-			realPath[j].append([x,y])
-			fakePath[j].append([0,0])
+			realPath[n].append([x,y])
+			fakePath[n].append([0,0])
 
 		if fakePointOn:
-			for i in range(0,int(time/period)):
-				fakePath[j][i]=fakePoint(realPath[j][i])
+			for t in range(0,int(time/period)):
+				fakePath[n][t]=fakePoint(realPath[n][t])
 
 	path=[realPath,fakePath]
 	return path
@@ -125,11 +127,61 @@ def normalizeMap(mapP):
 
 
 
+def getHeatmapByMapP(mapP):
+	#---------------------explain -------------
+	'''input seris of possibility map(map[n][t]) to get heatmap of each time
+	   output heatMap[t][x][y]=8 means at time t there is 8 person at (x,y) '''
 
+	#---------------------start -------------
+	heatMap=[]
+	for x in range(0.width):
+		for y in range(0,width):
+			for t in range(0,len(mapP[0])):
+				heatMap.append([])				
+				sump=0
+				for n in range(0,len(mapP)):
+					sump += map[n][t][x][y]
+				heatMap[t].append([])
+				heatMap[t][x].append([])
+				heatMap[t][x][y]=sump
+
+	return heatMap
+
+def getHeatmapByPath(path):
+	#---------------------explain -------------
+	'''input seris of path(path[n][t][x,y]) to get heatmap of each time
+	   output heatMap[t][x][y]=8 means at time t there is 8 person at (x,y) '''
+
+	#---------------------start -------------
+	heatMap=[]
+	for x in range(0.width):
+		for y in range(0,width):	
+			for t in range(0,len(path[0])):
+				heatMap.append([])
+				for n in range(0,len(path)):
+				heatMap[t].append([])
+				heatMap[t][x].append([])
+				eatMap[t][x][y]=0
+	for t in range(0,len(path[0])):
+		for n in range(0,len(path)):
+			x=path[n][t][0]
+			y=path[n][t][1]
+			heatMap[t][x][y] +=1
+
+	return heatMap
+
+
+
+
+
+
+# def getPeopleInside
 
 
 path = createPath()
-mapP = createPCloud(path[1]) #create mapP by fakePath
+mapPFake = createPCloud(path[1]) #create mapP by fakePath
+mapPReal = createPCloud(path[0]) #create mapP by fakePath
+
 
 
 # sum=0
