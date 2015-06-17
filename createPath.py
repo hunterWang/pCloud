@@ -1,11 +1,8 @@
 #encoding:utf-8
-
 import random
 import sys
-
-
 #---------------------parameter -------------
-times=300 #how many path you want to produce 
+times=1000 #how many path you want to produce 
 width=30 #boundry
 border=2 #width=border+zoneInside
 speed=1  
@@ -14,6 +11,21 @@ time=600  #how much time the point move in second
 maxDistant=speed*period
 radius=5 #equvilant to accurancy for track
 std = 2  #stander deviation to produce mapP 
+
+def main():
+
+
+	#----------------------start-----------------
+
+	path = createPath()
+	mapPFake = createPCloud(path[1]) #create mapP by fakePath
+	# mapPReal = createPCloud(path[0]) #create mapP by realPath
+	heatMapReal = getHeatmapByPath(path[0])  #realone
+	heatMapFakeByPath = getHeatmapByPath(path[1])  #fakeone
+	heatMapFakeByPMap = getHeatmapByMapP(mapPFake) #fakeoneByPmap
+
+	print compareHeatMap(heatMapFakeByPath,heatMapReal),compareHeatMap(heatMapFakeByPMap,heatMapReal)
+
 
 
 def createPath ():
@@ -134,13 +146,13 @@ def getHeatmapByMapP(mapP):
 
 	#---------------------start -------------
 	heatMap=[]
-	for x in range(0.width):
+	for x in range(0,width):
 		for y in range(0,width):
 			for t in range(0,len(mapP[0])):
 				heatMap.append([])				
 				sump=0
 				for n in range(0,len(mapP)):
-					sump += map[n][t][x][y]
+					sump += mapP[n][t][x][y]
 				heatMap[t].append([])
 				heatMap[t][x].append([])
 				heatMap[t][x][y]=sump
@@ -154,14 +166,13 @@ def getHeatmapByPath(path):
 
 	#---------------------start -------------
 	heatMap=[]
-	for x in range(0.width):
+	for x in range(0,width):
 		for y in range(0,width):	
 			for t in range(0,len(path[0])):
-				heatMap.append([])
-				for n in range(0,len(path)):
+				heatMap.append([])				
 				heatMap[t].append([])
 				heatMap[t][x].append([])
-				eatMap[t][x][y]=0
+				heatMap[t][x][y]=0
 	for t in range(0,len(path[0])):
 		for n in range(0,len(path)):
 			x=path[n][t][0]
@@ -170,17 +181,39 @@ def getHeatmapByPath(path):
 
 	return heatMap
 
+def compareHeatMap(fakeMap,realMap):
+	zoneNumber = 5 # if set 2 means 4 zone ,2*2 and so on
+	sx1,sx2=0,0
+	sy1,sy2=0,0
+	diff=0
+
+	for t in range(0,len(fakeMap)):
+		segment = width / zoneNumber
+		sumR=0			
+		sumF=0
+		
+
+		while (sx1 != width):
+			sx2 += segment			
+			for x in range(sx1,sx2):
+				while (sy1 != width):
+					sy2 += segment
+					for y in range(sy1,sy2):
+						sumR += realMap[t][x][y]
+						sumF += fakeMap[t][x][y]
+					diff += abs(sumR - sumF)
+					sy1 += segment
+			sx1 += segment
+
+	return diff
 
 
 
-
+main()
 
 # def getPeopleInside
 
 
-path = createPath()
-mapPFake = createPCloud(path[1]) #create mapP by fakePath
-mapPReal = createPCloud(path[0]) #create mapP by fakePath
 
 
 
