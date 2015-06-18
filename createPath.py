@@ -253,22 +253,40 @@ def compareHeatMap(fakeMap,realMap):
 def comparePeopleByPP(realPath,fakePath):
 	rnumIn,rnumOut=0,0
 	fnumIn,fnumOut=0,0
-	for t in range(0,len(path[0])):
-		for n in range(0,len(path)):
-			rx=path[n][t][0]
-			fx=path[n][t][0]
-			ry=path[n][t][1]
-			fy=path[n][t][1]
+	diff=0
+	for t in range(0,len(realPath[0])):
+		for n in range(0,len(realPath)):
+			rx=realPath[n][t][0]
+			fx=fakePath[n][t][0]
+			ry=realPath[n][t][1]
+			fy=fakePath[n][t][1]
 			if((rx<=border or rx>=(width-border)) and (ry<=border or ry>=(width-border)) ):
 				rnumOut +=1
 
 			if((fx<=border or fx>=(width-border)) and (fy<=border or fy>=(width-border)) ):
 				fnumOut +=1
-	
-	diff = abs(rnumOut-fnumOut)/(len(path)*len(path[0]))
+		diff += abs(rnumOut-fnumOut)
+	diff = diff/(len(realPath)*len(realPath[0]))
 	return diff
 
+def comparePeopleByPM(realPath,fakeMap):
+	fnumIn,fnumOut=0,0
 
+	for t in range(0,len(fakeMap[0])):	
+		for x in range(0,width):
+			for y in range(0,width):						
+					for n in range(0,len(fakeMap)):
+						if((x<=border or x>=(width-border)) and (y<=border or y>=(width-border)) ):
+							fnumOut += fakeMap[n][t][x][y]
+		for n in range(0,len(realPath)):
+			rx=realPath[n][t][0]
+			ry=realPath[n][t][1]
+			if((rx<=border or rx>=(width-border)) and (ry<=border or ry>=(width-border)) ):
+				rnumOut +=1		
+		diff += abs(rnumOut-fnumOut)
+		
+	diff = diff/(len(realPath)*len(realPath[0]))
+	return diff
 
 def getPeopleInsideByPath(path):
 	numIn,numOut=0,0
