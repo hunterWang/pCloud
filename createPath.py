@@ -6,15 +6,15 @@ times=1000 #how many path you want to produce
 width=30 #boundry
 border=5 #width=border+zoneInside
 speed=1  
-period=30 #time have one point 
-time=1800  #how much time the point move in second
+period=25 #time have one point 
+time=1000  #how much time the point move in second
 maxDistant=speed*period
-radius=5 #equvilant to accurancy for track
+radius=12 #equvilant to accurancy for track
 std = 5  #stander deviation to produce mapP 
 
 #---------------------cotroller -------------
-heatmapOn = 0
-peopleInOutOn =1
+heatmapOn = 1
+peopleInOutOn = 0
 
 def main():
 
@@ -47,7 +47,6 @@ def main():
 		print abs(fakemap[0]-realpath[0])+abs(fakemap[1]-realpath[1])
 
 
-
 def createPath ():
 	#---------------------explain -------------
 	'''create many fake path inside a width*width 2Dbox
@@ -66,7 +65,7 @@ def createPath ():
 		realPath.append([])
 		fakePath.append([])
 		# realPath[n].append([random.randint(border+1,width-1-border),random.randint(border+1,width-1-border)]) #r0
-		realPath[n].append([random.randint(0,width),random.randint(0,width)]) #r0
+		realPath[n].append([random.randint(0,width-1),random.randint(0,width-1)]) #r0
 		fakePath[n].append([0,0])
 		# print path[j][0]	
 		# print path[j][0][1]	
@@ -85,8 +84,6 @@ def createPath ():
 		if fakePointOn:
 			for t in range(0,int(time/period)):
 				fakePath[n][t]=fakePoint(realPath[n][t])
-	print "createPath"
-	print int(time/period),len(realPath[n])		
 
 	path=[realPath,fakePath]
 	return path
@@ -140,8 +137,8 @@ def createPCloud(path):
 					map[n][t][i].append(1/(sqrt(2*pi)*std)*exp(-1*rSruare/(2*std*std)))
 			map[n][t]=normalizeMap(map[n][t])
 
-	print "createPCloud"
-	print int(time/period),len(map[n]),t		
+	# print "createPCloud"
+	# print int(time/period),len(map[n])		
 
 
 	return map
@@ -176,13 +173,15 @@ def getHeatmapByMapP(mapP):
 	for x in range(0,width):
 		for y in range(0,width):
 			for t in range(0,len(mapP[0])):
-				heatMap.append([])				
+				if (y == 0 and x==0):
+					heatMap.append([])				
 				sump=0
 				for n in range(0,len(mapP)):
 					sump += mapP[n][t][x][y]
 				heatMap[t].append([])
 				heatMap[t][x].append([])
 				heatMap[t][x][y]=sump
+
 
 	return heatMap
 
@@ -196,42 +195,56 @@ def getHeatmapByPath(path):
 	for x in range(0,width):
 		for y in range(0,width):	
 			for t in range(0,len(path[0])):
-				heatMap.append([])				
+				if (y == 0 and x==0):
+					heatMap.append([])				
 				heatMap[t].append([])
 				heatMap[t][x].append([])
 				heatMap[t][x][y]=0
+
 	for t in range(0,len(path[0])):
 		for n in range(0,len(path)):
 			x=path[n][t][0]
-			y=path[n][t][1]
-			heatMap[t][x][y] +=1
+			y=path[n][t][1]			
+			heatMap[t][x][y] += 1
 
+	
 	return heatMap
 
 def compareHeatMap(fakeMap,realMap):
-	zoneNumber = 5 # if set 2 means 4 zone ,2*2 and so on
-	sx1,sx2=0,0
-	sy1,sy2=0,0
-	diff=0
+	#---------------------explain -------------
+	'''input two heatMap[t][x][y]=8 and will get accurancy of people been put to wrong zone  '''
+	#zoneNumber = 5 # if set 2 means 4 zone ,2*2 and so on
+	range1=[0,int(width/2)]
+	range2=[int(width/2),width]
+	diff,sumR,sumF=0,0,0
 
-	for t in range(0,len(fakeMap)):
-		segment = width / zoneNumber
-		sumR=0			
-		sumF=0
-		
 
-		while (sx1 != width):
-			sx2 += segment			
-			for x in range(sx1,sx2):
-				while (sy1 != width):
-					sy2 += segment
-					for y in range(sy1,sy2):
-						sumR += realMap[t][x][y]
-						sumF += fakeMap[t][x][y]
-					diff += abs(sumR - sumF)
-					sy1 += segment
-			sx1 += segment
+	for t in range(0,int(time/period)):
+		for x in range(0,width/2):
+			for y in range(0,width/2):
+				sumF += fakeMap[t][x][y]
+				sumR += realMap[t][x][y]
+		diff += abs(sumF-sumR)
+		sumR,sumF=0,0
+		for x in range(0,width/2):
+			for y in range(width/2,width):
+				sumF += fakeMap[t][x][y]
+				sumR += realMap[t][x][y]
+		diff += abs(sumF-sumR)
+		sumR,sumF=0,0
+		for x in range(width/2,width):
+			for y in range(0,width/2):
+				sumF += fakeMap[t][x][y]
+				sumR += realMap[t][x][y]
+		diff += abs(sumF-sumR)
+		sumR,sumF=0,0
+		for x in range(width/2,width):
+			for y in range(width/2,width):
+				sumF += fakeMap[t][x][y]
+				sumR += realMap[t][x][y]
+		diff += abs(sumF-sumR)
 
+	diff = diff*1.0/(2*times*int(time/period))
 	return diff
 
 def getPeopleInsideByPath(path):
