@@ -12,6 +12,10 @@ maxDistant=speed*period
 radius=5 #equvilant to accurancy for track
 std = 5  #stander deviation to produce mapP 
 
+#---------------------cotroller -------------
+heatmapOn = 0
+peopleInOutOn =1
+
 def main():
 
 
@@ -20,19 +24,29 @@ def main():
 	path = createPath()
 	mapPFake = createPCloud(path[1]) #create mapP by fakePath
 	# mapPReal = createPCloud(path[0]) #create mapP by realPath
-	if 0:
+	if heatmapOn:
 		heatMapReal = getHeatmapByPath(path[0])  #realone
 		heatMapFakeByPath = getHeatmapByPath(path[1])  #fakeone
 		heatMapFakeByPMap = getHeatmapByMapP(mapPFake) #fakeoneByPmap
+		print "compareHeatMapByPath : compareHeatMapByMap"
 		print compareHeatMap(heatMapFakeByPath,heatMapReal),compareHeatMap(heatMapFakeByPMap,heatMapReal)
 
-	if 1:
+	if peopleInOutOn:
 		print "real path"
-		print getPeopleInsideByPath(path[0])
+		realpath = getPeopleInsideByPath(path[0])
+		print realpath  #print sumIn,sunOut,total
 		print "fakeBypath"
-		print getPeopleInsideByPath(path[1])
+		fakepath=getPeopleInsideByPath(path[1])
+		print fakepath
 		print "fakeByMap"
-		print getPeopleInsideByMapP(mapPFake)
+		fakemap=getPeopleInsideByMapP(mapPFake)
+		print fakemap
+		print "accurancy for ByPath"
+		print abs(fakepath[0]-realpath[0])+abs(fakepath[1]-realpath[1])
+		print "accurancy for ByMap"
+		print abs(fakemap[0]-realpath[0])+abs(fakemap[1]-realpath[1])
+
+
 
 def createPath ():
 	#---------------------explain -------------
