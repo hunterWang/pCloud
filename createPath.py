@@ -4,10 +4,10 @@ import sys
 #---------------------parameter -------------
 times=1000 #how many path you want to produce 
 width=30 #boundry
-border=5 #width=border+zoneInside
+border=3 #width=border+zoneInside
 speed=1  
-period=25 #time have one point 
-time=1000  #how much time the point move in second
+period=15 #time have one point 
+time=600  #how much time the point move in second
 maxDistant=speed*period
 radius=12 #equvilant to accurancy for track
 std = 5  #stander deviation to produce mapP 
@@ -32,9 +32,11 @@ def main():
 		print compareHeatMap(heatMapFakeByPath,heatMapReal),compareHeatMap(heatMapFakeByPMap,heatMapReal)
 
 	if peopleInOutOn:
-		print "accurancy byPath,byMap"
-		print comparePeopleByPP(path[0],path[1]),comparePeopleByPM(path[0],mapPFake)
-
+		print "accurancy"
+		print "byPath"
+		print comparePeopleByPP(path[0],path[1])
+		print "byMap"
+		print comparePeopleByPM(path[0],mapPFake)
 		# print "real path"
 		# realpath = getPeopleInsideByPath(path[0])
 		# print realpath  #print sumIn,sunOut,total
@@ -266,11 +268,13 @@ def comparePeopleByPP(realPath,fakePath):
 			if((fx<=border or fx>=(width-border)) and (fy<=border or fy>=(width-border)) ):
 				fnumOut +=1
 		diff += abs(rnumOut-fnumOut)
-	diff = diff/(len(realPath)*len(realPath[0]))
+	diff = diff*1.0/(times*int(time/period))
 	return diff
 
 def comparePeopleByPM(realPath,fakeMap):
 	fnumIn,fnumOut=0,0
+	rnumOut=0
+	diff=0
 
 	for t in range(0,len(fakeMap[0])):	
 		for x in range(0,width):
@@ -284,13 +288,13 @@ def comparePeopleByPM(realPath,fakeMap):
 			if((rx<=border or rx>=(width-border)) and (ry<=border or ry>=(width-border)) ):
 				rnumOut +=1		
 		diff += abs(rnumOut-fnumOut)
-		
-	diff = diff/(len(realPath)*len(realPath[0]))
+
+	diff = diff*1.0/(times*int(time/period))
 	return diff
 
 def getPeopleInsideByPath(path):
 	numIn,numOut=0,0
-
+	diff=0
 	for t in range(0,len(path[0])):
 		for n in range(0,len(path)):
 			x=path[n][t][0]
