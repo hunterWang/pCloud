@@ -13,8 +13,8 @@ radius=12 #equvilant to accurancy for track
 std = 5  #stander deviation to produce mapP 
 
 #---------------------cotroller -------------
-heatmapOn = 1
-peopleInOutOn = 0
+heatmapOn = 0
+peopleInOutOn = 1
 
 def main():
 
@@ -32,19 +32,22 @@ def main():
 		print compareHeatMap(heatMapFakeByPath,heatMapReal),compareHeatMap(heatMapFakeByPMap,heatMapReal)
 
 	if peopleInOutOn:
-		print "real path"
-		realpath = getPeopleInsideByPath(path[0])
-		print realpath  #print sumIn,sunOut,total
-		print "fakeBypath"
-		fakepath=getPeopleInsideByPath(path[1])
-		print fakepath
-		print "fakeByMap"
-		fakemap=getPeopleInsideByMapP(mapPFake)
-		print fakemap
-		print "accurancy for ByPath"
-		print abs(fakepath[0]-realpath[0])+abs(fakepath[1]-realpath[1])
-		print "accurancy for ByMap"
-		print abs(fakemap[0]-realpath[0])+abs(fakemap[1]-realpath[1])
+		print "accurancy byPath,byMap"
+		print comparePeopleByPP(path[0],path[1]),comparePeopleByPM(path[0],mapPFake)
+
+		# print "real path"
+		# realpath = getPeopleInsideByPath(path[0])
+		# print realpath  #print sumIn,sunOut,total
+		# print "fakeBypath"
+		# fakepath=getPeopleInsideByPath(path[1])
+		# print fakepath
+		# print "fakeByMap"
+		# fakemap=getPeopleInsideByMapP(mapPFake)
+		# print fakemap
+		# print "accurancy for ByPath"
+		# print abs(fakepath[0]-realpath[0])+abs(fakepath[1]-realpath[1])
+		# print "accurancy for ByMap"
+		# print abs(fakemap[0]-realpath[0])+abs(fakemap[1]-realpath[1])
 
 
 def createPath ():
@@ -246,6 +249,26 @@ def compareHeatMap(fakeMap,realMap):
 
 	diff = diff*1.0/(2*times*int(time/period))
 	return diff
+
+def comparePeopleByPP(realPath,fakePath):
+	rnumIn,rnumOut=0,0
+	fnumIn,fnumOut=0,0
+	for t in range(0,len(path[0])):
+		for n in range(0,len(path)):
+			rx=path[n][t][0]
+			fx=path[n][t][0]
+			ry=path[n][t][1]
+			fy=path[n][t][1]
+			if((rx<=border or rx>=(width-border)) and (ry<=border or ry>=(width-border)) ):
+				rnumOut +=1
+
+			if((fx<=border or fx>=(width-border)) and (fy<=border or fy>=(width-border)) ):
+				fnumOut +=1
+	
+	diff = abs(rnumOut-fnumOut)/(len(path)*len(path[0]))
+	return diff
+
+
 
 def getPeopleInsideByPath(path):
 	numIn,numOut=0,0
