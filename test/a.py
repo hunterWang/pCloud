@@ -12,9 +12,14 @@ for line in file_in:
 			sys.stdout.write(line[i] + "-" )
 		else:
 			sys.stdout.write(line[i])
+			
 		file_out.write(line[i])
 
 
 sys.stdout.write("\n")
 file_in.close()
 file_out.close()
+
+
+for t in range(0,10):
+	print t 

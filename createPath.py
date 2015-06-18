@@ -4,13 +4,13 @@ import sys
 #---------------------parameter -------------
 times=1000 #how many path you want to produce 
 width=30 #boundry
-border=2 #width=border+zoneInside
+border=5 #width=border+zoneInside
 speed=1  
-period=15 #time have one point 
-time=600  #how much time the point move in second
+period=30 #time have one point 
+time=1800  #how much time the point move in second
 maxDistant=speed*period
 radius=5 #equvilant to accurancy for track
-std = 2  #stander deviation to produce mapP 
+std = 5  #stander deviation to produce mapP 
 
 def main():
 
@@ -20,13 +20,19 @@ def main():
 	path = createPath()
 	mapPFake = createPCloud(path[1]) #create mapP by fakePath
 	# mapPReal = createPCloud(path[0]) #create mapP by realPath
-	heatMapReal = getHeatmapByPath(path[0])  #realone
-	heatMapFakeByPath = getHeatmapByPath(path[1])  #fakeone
-	heatMapFakeByPMap = getHeatmapByMapP(mapPFake) #fakeoneByPmap
+	if 0:
+		heatMapReal = getHeatmapByPath(path[0])  #realone
+		heatMapFakeByPath = getHeatmapByPath(path[1])  #fakeone
+		heatMapFakeByPMap = getHeatmapByMapP(mapPFake) #fakeoneByPmap
+		print compareHeatMap(heatMapFakeByPath,heatMapReal),compareHeatMap(heatMapFakeByPMap,heatMapReal)
 
-	print compareHeatMap(heatMapFakeByPath,heatMapReal),compareHeatMap(heatMapFakeByPMap,heatMapReal)
-
-
+	if 1:
+		print "real path"
+		print getPeopleInsideByPath(path[0])
+		print "fakeBypath"
+		print getPeopleInsideByPath(path[1])
+		print "fakeByMap"
+		print getPeopleInsideByMapP(mapPFake)
 
 def createPath ():
 	#---------------------explain -------------
@@ -45,7 +51,8 @@ def createPath ():
 	for n in range(0,times):		
 		realPath.append([])
 		fakePath.append([])
-		realPath[n].append([random.randint(0,width-border),random.randint(0,width-border)]) #r0
+		# realPath[n].append([random.randint(border+1,width-1-border),random.randint(border+1,width-1-border)]) #r0
+		realPath[n].append([random.randint(0,width),random.randint(0,width)]) #r0
 		fakePath[n].append([0,0])
 		# print path[j][0]	
 		# print path[j][0][1]	
@@ -54,6 +61,7 @@ def createPath ():
 			while gate==0:
 				x = realPath[n][t][0] + random.randint(-maxDistant,maxDistant)
 				y = realPath[n][t][1] + random.randint(-maxDistant,maxDistant)
+				# if border+1<x<width-1-border and border+1<y<width-border-1:
 				if 0<x<width and 0<y<width:
 					gate=1
 
@@ -63,6 +71,8 @@ def createPath ():
 		if fakePointOn:
 			for t in range(0,int(time/period)):
 				fakePath[n][t]=fakePoint(realPath[n][t])
+	print "createPath"
+	print int(time/period),len(realPath[n])		
 
 	path=[realPath,fakePath]
 	return path
@@ -105,7 +115,7 @@ def createPCloud(path):
 	map=[]
 	for n in range(0,times):
 		map.append([])
-		for t in range(0,int(time/period)):
+		for t in range(0,int(time/period)+1):			
 			map[n].append([])
 			for i in range(0,width):
 				map[n][t].append([])
@@ -115,6 +125,9 @@ def createPCloud(path):
 					rSruare = (x-i)*(x-i)+(y-j)*(y-j)
 					map[n][t][i].append(1/(sqrt(2*pi)*std)*exp(-1*rSruare/(2*std*std)))
 			map[n][t]=normalizeMap(map[n][t])
+
+	print "createPCloud"
+	print int(time/period),len(map[n]),t		
 
 
 	return map
@@ -207,11 +220,44 @@ def compareHeatMap(fakeMap,realMap):
 
 	return diff
 
+def getPeopleInsideByPath(path):
+	numIn,numOut=0,0
+
+	for t in range(0,len(path[0])):
+		for n in range(0,len(path)):
+			x=path[n][t][0]
+			y=path[n][t][1]
+			if((x<=border or x>=(width-border)) and (y<=border or y>=(width-border)) ):
+				numOut += 1
+			else:
+				numIn += 1
+	numIn=numIn*1.0/(times*(1+time/period))
+	numOut=numOut*1.0/(times*(1+time/period))
+	num=[numIn,numOut,numIn+numOut]
+	return num 
+
+def getPeopleInsideByMapP(mapP):
+	numIn,numOut=0,0
+
+	for x in range(0,width):
+		for y in range(0,width):
+			for t in range(0,len(mapP[0])):				
+				for n in range(0,len(mapP)):
+					if((x<=border or x>=(width-border)) and (y<=border or y>=(width-border)) ):
+						numOut += mapP[n][t][x][y]
+					else:
+						numIn += mapP[n][t][x][y]
+	numIn=numIn/(times*(1+time/period))
+	numOut=numOut/(times*(1+time/period))
+	num=[numIn,numOut,numIn+numOut]
+	return num
+					
+				
 
 
 main()
 
-# def getPeopleInside
+
 
 
 
